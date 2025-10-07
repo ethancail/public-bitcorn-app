@@ -8,7 +8,7 @@ description: >-
   optional fiat integration via Strike.
 version: "1.0.0"
 category: finance
-developer: BitCorn Finance
+developer: BitCorn Techologies Inc.
 website: https://github.com/ethanccail/public-bitcorn-app
 dependencies:
   - lightning

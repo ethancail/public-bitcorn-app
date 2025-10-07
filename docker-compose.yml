@@ -1,7 +1,6 @@
-# public-bitcorn-app/docker-compose.yml
 services:
   api:
-    image: ethanccail/lightning-app:0.1.0-alpha
+    image: ethanccail/lightning-app:latest
     restart: unless-stopped
     container_name: bitcorn_api_1
     environment:
@@ -18,6 +17,6 @@ services:
       LNSERVICE_TLS_DISABLE: "true"
     volumes:
       - ./data:/data
-      - ${LND_DATA_DIR}/tls.cert:/lnd/tls.cert:ro
-      - ${LND_DATA_DIR}/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
+      - ${LND_DATA_DIR:-/home/umbrel/umbrel/app-data/lightning/data/lnd}/tls.cert:/lnd/tls.cert:ro
+      - ${LND_DATA_DIR:-/home/umbrel/umbrel/app-data/lightning/data/lnd}/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
     network_mode: "host"
