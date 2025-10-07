@@ -1,0 +1,23 @@
+# public-bitcorn-app/docker-compose.yml
+services:
+  api:
+    image: ethanccail/lightning-app:0.1.0-alpha
+    restart: unless-stopped
+    container_name: bitcorn_api_1
+    environment:
+      PORT: 3001
+      SUPABASE_URL: ${SUPABASE_URL:-https://whnijkkttovsozjowkif.supabase.co}
+      SUPABASE_KEY: ${SUPABASE_KEY}
+      # LND connection settings
+      LND_GRPC_HOST: "127.0.0.1:10009"
+      LND_TLS_CERT_PATH: "/lnd/tls.cert"
+      LND_MACAROON_PATH: "/lnd/data/chain/bitcoin/mainnet/admin.macaroon"
+      LND_ADMIN_MACAROON_PATH: "/lnd/data/chain/bitcoin/mainnet/admin.macaroon"
+      LNSERVICE_CHAIN: bitcoin
+      LNSERVICE_NETWORK: mainnet
+      LNSERVICE_TLS_DISABLE: "true"
+    volumes:
+      - ./data:/data
+      - ${LND_DATA_DIR}/tls.cert:/lnd/tls.cert:ro
+      - ${LND_DATA_DIR}/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
+    network_mode: "host"

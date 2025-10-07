@@ -1,0 +1,37 @@
+manifestVersion: 1
+id: bitcorn-lightning
+name: BitCorn Lightning
+tagline: Bitcoin & Lightning for Grain Sales
+description: >-
+  Manage Bitcoin Lightning transactions between grain merchants and farmers.
+  Generate invoices, send payments, and automate treasury operations with 
+  optional fiat integration via Strike.
+version: "1.0.0"
+category: finance
+developer: BitCorn Finance
+website: https://github.com/ethanccail/public-bitcorn-app
+dependencies:
+  - lightning
+repo: https://github.com/ethanccail/public-bitcorn-app
+support: https://github.com/ethanccail/public-bitcorn-app/issues
+port: 3001
+path: ""
+defaultUsername: ""
+defaultPassword: ""
+env:
+  - name: SUPABASE_KEY
+    description: "Your Supabase API key"
+    required: true
+    default: ""
+  - name: SUPABASE_URL
+    description: "Supabase project URL"
+    required: false
+    default: "https://whnijkkttovsozjowkif.supabase.co"
+  - name: ENABLE_STRIKE
+    description: "Enable Strike API integration"
+    required: false
+    default: "false"
+  - name: STRIKE_API_KEY
+    description: "Strike API key (optional)"
+    required: false
+    default: ""
