@@ -133,8 +133,8 @@ fi
 # Start the container
 echo "Starting BitCorn Lightning App..."
 cd $UMBREL_APP_DIR
-docker compose pull
-docker compose up -d
+sudo docker compose pull
+sudo docker compose up -d
 
 echo ""
 echo "================================================================"
