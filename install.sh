@@ -65,41 +65,56 @@ cd $UMBREL_APP_DIR
 sudo docker compose pull
 sudo docker compose up -d
 
-# Create app icon in Umbrel's user-data directory
-echo "Installing app icon..."
-sudo mkdir -p /home/umbrel/umbrel/user-data/app-icons
-sudo curl -s -L -o /home/umbrel/umbrel/user-data/app-icons/bitcorn-lightning.png https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png
-sudo chown umbrel:umbrel /home/umbrel/umbrel/user-data/app-icons/bitcorn-lightning.png
-
-# Register app with Umbrel by creating app definition
-echo "Registering app with Umbrel..."
+# Create app metadata directory and files
+echo "Creating app metadata for Umbrel dashboard..."
 sudo mkdir -p /home/umbrel/umbrel/apps/bitcorn-lightning
+
+# Download and install app icon
+echo "Installing app icon..."
+sudo curl -s -L -o /home/umbrel/umbrel/apps/bitcorn-lightning/icon.png https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png 2>/dev/null || echo "Warning: Could not download icon"
+
+# Create app.yml manifest
 sudo tee /home/umbrel/umbrel/apps/bitcorn-lightning/app.yml > /dev/null << 'APPDEF'
 id: bitcorn-lightning
 name: BitCorn Lightning
+version: "1.0.0"
 tagline: Bitcoin & Lightning for Grain Sales
-icon: /user-data/app-icons/bitcorn-lightning.png
+description: Manage Bitcoin Lightning transactions between grain merchants and farmers
+category: finance
 port: 3001
 path: ""
 APPDEF
+
+# Set proper ownership
 sudo chown -R umbrel:umbrel /home/umbrel/umbrel/apps/bitcorn-lightning
 
-# Restart Umbrel services to detect the new app
-echo "Restarting Umbrel services..."
-cd /home/umbrel/umbrel
-sudo docker compose restart
+# Try to restart Umbrel manager container to detect new app
+echo "Notifying Umbrel of new app..."
+MANAGER_CONTAINER=$(sudo docker ps --filter "name=manager" --format "{{.Names}}" | head -n 1)
+if [ ! -z "$MANAGER_CONTAINER" ]; then
+  echo "Restarting Umbrel manager container: $MANAGER_CONTAINER"
+  sudo docker restart $MANAGER_CONTAINER 2>/dev/null || echo "Could not restart manager"
+else
+  echo "Umbrel manager container not found - dashboard icon may not appear"
+fi
 
 echo ""
 echo "================================================================"
 echo "✅ BitCorn Lightning has been installed successfully!"
 echo "================================================================"
 echo ""
-echo "The app should now appear in your Umbrel dashboard."
+echo "📱 ACCESS YOUR APP:"
+echo "   http://umbrel.local:3001"
+echo "   or"
+echo "   http://$(hostname -I | awk '{print $1}'):3001"
 echo ""
-echo "If you don't see it immediately:"
-echo "1. Wait 30 seconds for services to restart"
-echo "2. Refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
-echo "3. Clear your browser cache if needed"
+echo "🔍 DASHBOARD ICON:"
+echo "   The app should appear in your Umbrel dashboard."
+echo "   If it doesn't show immediately:"
+echo "   1. Wait 30-60 seconds for Umbrel to detect the app"
+echo "   2. Refresh your browser (Ctrl+Shift+R)"
+echo "   3. Clear browser cache if needed"
 echo ""
-echo "Access your app at: http://umbrel.local:3001"
+echo "💡 The app is fully functional at the URL above even if"
+echo "   the dashboard icon doesn't appear immediately."
 echo "================================================================"
