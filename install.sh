@@ -4,7 +4,6 @@ set -e
 # Set paths for Umbrel
 UMBREL_DIR="/home/umbrel/umbrel"
 UMBREL_APP_DIR="$UMBREL_DIR/app-data/bitcorn-lightning-app"
-UMBREL_APP_STORE_DIR="$UMBREL_DIR/app-store/bitcorn-lightning"
 
 echo "================================================================"
 echo "BitCorn Lightning App - Installation Script"
@@ -13,11 +12,6 @@ echo "================================================================"
 # Create app data directory
 echo "Creating app directories..."
 mkdir -p $UMBREL_APP_DIR/data
-
-# Create app store directory with proper permissions
-echo "Setting up app store directory..."
-sudo mkdir -p $UMBREL_APP_STORE_DIR
-sudo chown -R umbrel:umbrel $UMBREL_APP_STORE_DIR
 
 # Prompt for Supabase key
 echo "Enter your Supabase API key:"
@@ -32,14 +26,21 @@ SUPABASE_KEY=$SUPABASE_KEY
 EOL
 chmod 600 $UMBREL_APP_DIR/.env
 
-# Create docker-compose file
-echo "Creating Docker configuration..."
+# Create docker-compose file with labels for Umbrel UI
+echo "Creating Docker configuration with Umbrel labels..."
 cat > $UMBREL_APP_DIR/docker-compose.yml << 'EOL'
+version: "3.7"
+
 services:
   api:
     image: ethanccail/lightning-app:latest
     restart: unless-stopped
     container_name: bitcorn_api_1
+    labels:
+      com.umbrel.app.id: bitcorn-lightning
+      com.umbrel.app.name: BitCorn Lightning
+      com.umbrel.app.port: "3001"
+      com.umbrel.app.category: finance
     environment:
       PORT: 3001
       SUPABASE_URL: ${SUPABASE_URL:-https://whnijkkttovsozjowkif.supabase.co}
@@ -58,59 +59,47 @@ services:
     network_mode: "host"
 EOL
 
-# Create umbrel-app.yml in app-store directory
-echo "Creating app metadata..."
-cat > $UMBREL_APP_STORE_DIR/umbrel-app.yml << 'EOL'
-manifestVersion: 1
-id: bitcorn-lightning
-category: finance
-name: BitCorn Lightning
-version: "1.0.0"
-tagline: Bitcoin & Lightning for Grain Sales
-description: Manage Bitcoin Lightning transactions between grain merchants and farmers
-developer: BitCorn Technologies Inc.
-website: https://github.com/ethancail/public-bitcorn-app
-dependencies:
-  - lightning
-repo: https://github.com/ethancail/public-bitcorn-app
-support: https://github.com/ethancail/public-bitcorn-app/issues
-port: 3001
-EOL
-
-# Download and set app icon
-echo "Downloading app icon..."
-sudo curl -s -L -o $UMBREL_APP_STORE_DIR/icon.svg https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png
-sudo chown umbrel:umbrel $UMBREL_APP_STORE_DIR/icon.svg
-
-# Copy docker-compose to app-store directory as well (Umbrel may look here)
-sudo cp $UMBREL_APP_DIR/docker-compose.yml $UMBREL_APP_STORE_DIR/docker-compose.yml
-sudo chown umbrel:umbrel $UMBREL_APP_STORE_DIR/docker-compose.yml
-
 # Start the container
 echo "Starting BitCorn Lightning App..."
 cd $UMBREL_APP_DIR
 sudo docker compose pull
 sudo docker compose up -d
 
-# Try to restart Umbrel's manager to detect the new app
-echo "Notifying Umbrel of new app installation..."
-if sudo docker ps | grep -q umbrel_manager; then
-  echo "Restarting Umbrel manager..."
-  sudo docker restart umbrel_manager_1 2>/dev/null || sudo docker restart $(sudo docker ps --filter name=manager --format "{{.Names}}") 2>/dev/null || echo "Could not restart manager"
-fi
+# Create app icon in Umbrel's user-data directory
+echo "Installing app icon..."
+sudo mkdir -p /home/umbrel/umbrel/user-data/app-icons
+sudo curl -s -L -o /home/umbrel/umbrel/user-data/app-icons/bitcorn-lightning.png https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png
+sudo chown umbrel:umbrel /home/umbrel/umbrel/user-data/app-icons/bitcorn-lightning.png
+
+# Register app with Umbrel by creating app definition
+echo "Registering app with Umbrel..."
+sudo mkdir -p /home/umbrel/umbrel/apps/bitcorn-lightning
+sudo tee /home/umbrel/umbrel/apps/bitcorn-lightning/app.yml > /dev/null << 'APPDEF'
+id: bitcorn-lightning
+name: BitCorn Lightning
+tagline: Bitcoin & Lightning for Grain Sales
+icon: /user-data/app-icons/bitcorn-lightning.png
+port: 3001
+path: ""
+APPDEF
+sudo chown -R umbrel:umbrel /home/umbrel/umbrel/apps/bitcorn-lightning
+
+# Restart Umbrel services to detect the new app
+echo "Restarting Umbrel services..."
+cd /home/umbrel/umbrel
+sudo docker compose restart
 
 echo ""
 echo "================================================================"
-echo "BitCorn Lightning has been installed!"
+echo "✅ BitCorn Lightning has been installed successfully!"
+echo "================================================================"
+echo ""
+echo "The app should now appear in your Umbrel dashboard."
+echo ""
+echo "If you don't see it immediately:"
+echo "1. Wait 30 seconds for services to restart"
+echo "2. Refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)"
+echo "3. Clear your browser cache if needed"
 echo ""
 echo "Access your app at: http://umbrel.local:3001"
-echo ""
-echo "If the app icon doesn't appear in your Umbrel dashboard:"
-echo "1. Try refreshing your browser (Ctrl+Shift+R)"
-echo "2. Restart Umbrel: cd ~/umbrel && sudo docker compose restart"
-echo "3. The app is still fully functional at the URL above"
-echo ""
-echo "After logging in, run this command to set your node as admin:"
-echo "  cd ~/umbrel/app-data/bitcorn-lightning-app"
-echo "  docker compose exec api node src/utils/get-node-pubkey.js"
 echo "================================================================"
