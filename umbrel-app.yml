@@ -8,12 +8,12 @@ description: >-
   optional fiat integration via Strike.
 version: "1.0.0"
 category: finance
-developer: BitCorn Techologies Inc.
-website: https://github.com/ethanccail/public-bitcorn-app
+developer: BitCorn Technologies Inc.
+website: https://github.com/ethancail/public-bitcorn-app
 dependencies:
   - lightning
-repo: https://github.com/ethanccail/public-bitcorn-app
-support: https://github.com/ethanccail/public-bitcorn-app/issues
+repo: https://github.com/ethancail/public-bitcorn-app
+support: https://github.com/ethancail/public-bitcorn-app/issues
 port: 3001
 path: ""
 defaultUsername: ""
@@ -27,11 +27,3 @@ env:
     description: "Supabase project URL"
     required: false
     default: "https://whnijkkttovsozjowkif.supabase.co"
-  - name: ENABLE_STRIKE
-    description: "Enable Strike API integration"
-    required: false
-    default: "false"
-  - name: STRIKE_API_KEY
-    description: "Strike API key (optional)"
-    required: false
-    default: ""
