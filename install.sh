@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
-UMBREL_APP_DIR="$HOME/umbrel/app-data/bitcorn-lightning-app"
-UMBREL_APPS_DIR="$HOME/umbrel/apps/bitcorn-lightning"
+# Set paths
+UMBREL_DIR="/home/umbrel/umbrel"
+UMBREL_APP_DIR="$UMBREL_DIR/app-data/bitcorn-lightning-app"
+UMBREL_APPS_DIR="$UMBREL_DIR/apps/bitcorn-lightning"
 
 # Display welcome message
 echo "================================================================"
@@ -14,9 +16,20 @@ echo "Before continuing, make sure you have your Supabase API key ready."
 echo ""
 read -p "Press Enter to continue, or Ctrl+C to cancel..."
 
-# Create app directories
+# Create app directory (no sudo required for app-data)
 mkdir -p $UMBREL_APP_DIR/data
-mkdir -p $UMBREL_APPS_DIR
+
+# Try to create apps directory with sudo if needed
+echo "Creating app icon directory (may require sudo)..."
+if [ ! -d "$UMBREL_APPS_DIR" ]; then
+  sudo mkdir -p $UMBREL_APPS_DIR || {
+    echo "Could not create $UMBREL_APPS_DIR - will continue without dashboard icon"
+  }
+  # Make sure umbrel user owns the directory
+  if [ -d "$UMBREL_APPS_DIR" ]; then
+    sudo chown -R umbrel:umbrel $UMBREL_APPS_DIR
+  fi
+fi
 
 # Prompt for Supabase API key
 echo ""
@@ -61,9 +74,12 @@ services:
     network_mode: "host"
 EOL
 
-# Create umbrel-app.yml for dashboard integration
-echo "Creating app metadata for Umbrel dashboard..."
-cat > $UMBREL_APPS_DIR/umbrel-app.yml << EOL
+# Create dashboard integration files if we have permissions
+if [ -d "$UMBREL_APPS_DIR" ]; then
+  echo "Creating app metadata for Umbrel dashboard..."
+  
+  # Create app metadata file
+  cat > $UMBREL_APPS_DIR/umbrel-app.yml << EOL
 manifestVersion: 1
 id: bitcorn-lightning
 category: finance
@@ -82,17 +98,36 @@ support: https://github.com/ethancail/public-bitcorn-app/issues
 port: 3001
 EOL
 
-# Download app icon
-echo "Downloading app icon..."
-curl -s -o $UMBREL_APPS_DIR/icon.png https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png
+  # Download app icon
+  echo "Downloading app icon..."
+  curl -s -o $UMBREL_APPS_DIR/icon.png https://raw.githubusercontent.com/ethancail/public-bitcorn-app/main/assets/icon.png
 
-# Register the app in Umbrel's app list
-UMBREL_APP_DATA="$HOME/umbrel/app-data.json"
-if [ -f "$UMBREL_APP_DATA" ]; then
-  echo "Registering app with Umbrel dashboard..."
-  TMP_FILE=$(mktemp)
-  jq ".apps += {\"bitcorn-lightning\": {\"id\": \"bitcorn-lightning\", \"name\": \"BitCorn Lightning\", \"icon\": \"/apps/bitcorn-lightning/icon.png\", \"port\": 3001}}" $UMBREL_APP_DATA > $TMP_FILE
-  mv $TMP_FILE $UMBREL_APP_DATA
+  # Register app in app-data.json - with sudo if needed
+  UMBREL_APP_DATA="$UMBREL_DIR/app-data.json"
+  if [ -f "$UMBREL_APP_DATA" ]; then
+    echo "Registering app with Umbrel dashboard..."
+    if command -v jq > /dev/null; then
+      # Create temporary file with updated JSON
+      TMP_FILE=$(mktemp)
+      jq ".apps += {\"bitcorn-lightning\": {\"id\": \"bitcorn-lightning\", \"name\": \"BitCorn Lightning\", \"icon\": \"/apps/bitcorn-lightning/icon.png\", \"port\": 3001}}" $UMBREL_APP_DATA > $TMP_FILE
+      
+      # Use sudo to update the actual file if needed
+      if [ -w "$UMBREL_APP_DATA" ]; then
+        mv $TMP_FILE $UMBREL_APP_DATA
+      else
+        sudo mv $TMP_FILE $UMBREL_APP_DATA
+        sudo chown umbrel:umbrel $UMBREL_APP_DATA
+      fi
+      
+      echo "✓ App registered in dashboard"
+    else
+      echo "! jq not found - cannot update app-data.json"
+      echo "! App icon may not appear in dashboard"
+    fi
+  fi
+else
+  echo "! Dashboard integration skipped (permission denied)"
+  echo "! App will work but won't appear in the Umbrel dashboard"
 fi
 
 # Start the container
@@ -105,5 +140,10 @@ echo ""
 echo "================================================================"
 echo "BitCorn Lightning has been installed!"
 echo "Access your app at: http://umbrel.local:3001"
-echo "You should now see BitCorn Lightning in your Umbrel dashboard"
+if [ -d "$UMBREL_APPS_DIR" ]; then
+  echo "The app icon should appear in your Umbrel dashboard"
+else
+  echo "Note: App icon will not appear in dashboard due to permission issues"
+  echo "The app is still functional at http://umbrel.local:3001"
+fi
 echo "================================================================"
