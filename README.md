@@ -1,35 +1,36 @@
-# BitCorn Lightning
+# BitCorn Lightning - Umbrel Community App Store
 
-## Bitcoin & Lightning Network for Grain Sales
+Bitcoin & Lightning Network for Grain Sales
 
-BitCorn Lightning is an Umbrel app that facilitates Bitcoin and Lightning Network transactions between grain merchants and farmers.
+## Installation
 
-### Features
-- Create and manage Lightning invoices for grain sales
-- Support for fiat invoicing through Strike integration 
-- Track sales and payment history
-- Monitor Lightning Network channels
-- Automated treasury management
+### Add Community App Store to Umbrel
 
-### Installation
+1. Open your Umbrel dashboard
+2. Go to **App Store**
+3. Scroll to the bottom and click **"Community App Stores"**
+4. Click **"Add App Store"**
+5. Enter this repository URL: https://github.com/ethancail/public-bitcorn-app
+6. Click **"Add"**
 
-1. Add this app store to your Umbrel:
+### Install BitCorn Lightning
 
-umbrel app-store add https://github.com/ethanccail/public-bitcorn-app
+1. Once the app store is added, you'll see "BitCorn Lightning" in your App Store
+2. Click on the BitCorn Lightning app
+3. Click **"Install"**
+4. **Important:** During installation, you'll be asked for:
+- **Supabase API Key** (provided by BitCorn Technologies)
+5. Enter your credentials and complete installation
+6. The app will be available at `http://yournodeipaddress:3001`
 
-2. Install the app:
-umbrel app install bitcorn-lightning
+## Getting Supabase Credentials
 
-3. Open the app in your browser and follow the setup instrucitons.
+Contact BitCorn Technologies to receive your Supabase API key:
+- Email: ethan@bitcorn.biz
+- Or open an issue on this repository
 
-### Requirements
+## Features
 
-- Umbrel with Bitcoin and Lightning Network (LND) installed
-- A Supabase account and API key
-- Optional: Strike account for fiat settlement
-
-### Support
-For support, please open an issue on this repository.
-
-### License
-This project is licensed under the MIT License - see the LICENSE file for details.
+- **Lightning Invoice Creation** - Generate invoices for grain sales
+- **Direct Payments** - Send sats directly between Lightning nodes
+- **Transaction History** - Track all sales and purchases

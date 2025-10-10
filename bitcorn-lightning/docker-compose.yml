@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
   api:
     image: ethanccail/lightning-app:latest
@@ -5,6 +7,7 @@ services:
     container_name: bitcorn_api_1
     environment:
       PORT: 3001
+
       SUPABASE_URL: ${SUPABASE_URL:-https://whnijkkttovsozjowkif.supabase.co}
       SUPABASE_KEY: ${SUPABASE_KEY}
       # LND connection settings
@@ -17,6 +20,6 @@ services:
       LNSERVICE_TLS_DISABLE: "true"
     volumes:
       - ./data:/data
-      - ${LND_DATA_DIR:-/home/umbrel/umbrel/app-data/lightning/data/lnd}/tls.cert:/lnd/tls.cert:ro
-      - ${LND_DATA_DIR:-/home/umbrel/umbrel/app-data/lightning/data/lnd}/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
+      - /home/umbrel/umbrel/app-data/lightning/data/lnd/tls.cert:/lnd/tls.cert:ro
+      - /home/umbrel/umbrel/app-data/lightning/data/lnd/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
     network_mode: "host"
