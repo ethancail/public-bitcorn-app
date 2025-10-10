@@ -2,32 +2,18 @@ manifestVersion: 1
 id: bitcorn-lightning
 name: BitCorn Lightning
 tagline: Bitcoin & Lightning for Grain Sales
-description: >-
-  BitCorn Lightning enables Bitcoin and Lightning Network transactions 
-  between grain merchants and farmers. Create invoices, manage payments,
-  and track sales all through the Lightning Network.
-  
-  
-  Features:
-  - Lightning invoice creation for grain sales
-  - Direct node-to-node payments via keysend
-  - Transaction history tracking
-  - Admin panel for managing users
-  - Real-time payment processing
+description: >
+  BitCorn Lightning enables Bitcoin and Lightning transactions between grain
+  merchants and farmers. Create invoices, manage payments, and track sales.
 version: "1.0.0"
 category: finance
 developer: BitCorn Technologies Inc.
 website: https://github.com/ethancail/public-bitcorn-app
-dependencies:
-  - lightning
 repo: https://github.com/ethancail/public-bitcorn-app
 support: https://github.com/ethancail/public-bitcorn-app/issues
+dependencies:
+  - lightning
 port: 3001
-path: ""
-defaultUsername: ""
-defaultPassword: ""
-submitter: BitCorn Technologies
-submission: https://github.com/getumbrel/umbrel-apps
 env:
   - name: SUPABASE_KEY
     description: "Your Supabase API key"
