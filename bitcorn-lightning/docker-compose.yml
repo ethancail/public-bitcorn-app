@@ -2,13 +2,13 @@ version: "3.8"
 
 services:
   api:
+    container_name: bitcorn-lightning-api
     image: ghcr.io/ethancail/bitcorn-lightning-app:latest
     restart: unless-stopped
     environment:
       PORT: 3001
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_KEY: ${SUPABASE_KEY}
-
       LND_GRPC_HOST: lnd:10009
       LND_TLS_CERT_PATH: /lnd/tls.cert
       LND_MACAROON_PATH: /lnd/data/chain/bitcoin/mainnet/admin.macaroon
@@ -16,6 +16,9 @@ services:
       LNSERVICE_CHAIN: bitcoin
       LNSERVICE_NETWORK: mainnet
       LNSERVICE_TLS_DISABLE: "true"
+
+    ports:
+      - "3001:3001"
 
     networks:
       - umbrel_main_network
