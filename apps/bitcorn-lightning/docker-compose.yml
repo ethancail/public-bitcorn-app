@@ -2,14 +2,13 @@ version: "3.8"
 
 services:
   api:
-    image: ghcr.io/ethancail/bitcorn-lightning-app:latest  # public image
+    image: ghcr.io/ethancail/bitcorn-lightning-app:latest
     restart: unless-stopped
     environment:
       PORT: 3001
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_KEY: ${SUPABASE_KEY}
 
-      # LND connection (use Lightning app’s data)
       LND_GRPC_HOST: lnd:10009
       LND_TLS_CERT_PATH: /lnd/tls.cert
       LND_MACAROON_PATH: /lnd/data/chain/bitcoin/mainnet/admin.macaroon
@@ -18,14 +17,11 @@ services:
       LNSERVICE_NETWORK: mainnet
       LNSERVICE_TLS_DISABLE: "true"
 
-    # DO NOT use network_mode: host or container_name
     networks:
       - umbrel_main_network
 
-    # Use a named volume (Umbrel is fine with this), not a relative bind
     volumes:
       - bitcorn-data:/data
-      # Mount Lightning app data read-only
       - /home/umbrel/umbrel/app-data/lightning/data/lnd/tls.cert:/lnd/tls.cert:ro
       - /home/umbrel/umbrel/app-data/lightning/data/lnd/data/chain/bitcoin/mainnet:/lnd/data/chain/bitcoin/mainnet:ro
 
